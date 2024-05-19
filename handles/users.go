@@ -3,9 +3,10 @@ package handles
 import (
 	"encoding/json"
 	"net/http"
-	"taco/db"
-	"taco/model"
-	"taco/services"
+
+	"github.com/jfortez/gogagg/db"
+	"github.com/jfortez/gogagg/model"
+	"github.com/jfortez/gogagg/services"
 )
 
 func UsersHandle(w http.ResponseWriter, _ *http.Request) {

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"taco/db"
 	"text/template"
 	"time"
+
+	"github.com/jfortez/gogagg/db"
 )
 
 func handle(w http.ResponseWriter, r *http.Request) {

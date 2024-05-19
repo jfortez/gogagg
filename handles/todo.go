@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"taco/model"
-	"taco/services"
+
+	"github.com/jfortez/gogagg/model"
+	"github.com/jfortez/gogagg/services"
 )
 
 const url = "https://jsonplaceholder.typicode.com/todos/"

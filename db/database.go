@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"os"
-	"taco/model"
+
+	"github.com/jfortez/gogagg/model"
 
 	_ "github.com/mattn/go-sqlite3"
 )

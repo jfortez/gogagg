@@ -2,7 +2,8 @@ package main
 
 import (
 	"net/http"
-	"taco/handles"
+
+	"github.com/jfortez/gogagg/handles"
 )
 
 func GetRoutes(router *http.ServeMux) {

@@ -1,4 +1,4 @@
-module taco
+module github.com/jfortez/gogagg
 
 go 1.22.2
 

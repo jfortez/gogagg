@@ -3,7 +3,8 @@ package services
 import (
 	"database/sql"
 	"log"
-	"taco/model"
+
+	"github.com/jfortez/gogagg/model"
 )
 
 func GetUsers(connection *sql.DB) (users []model.User) {

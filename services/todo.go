@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"taco/model"
+
+	"github.com/jfortez/gogagg/model"
 )
 
 func GetTodo[K model.Todo | []model.Todo](url string) (jsonData K) {
