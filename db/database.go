@@ -12,7 +12,7 @@ import (
 
 var Pool *sql.DB
 
-func SeedUsers() []model.User {
+func seedUsers() []model.User {
 	Users := []model.User{
 		{Name: "John Doe", Email: "jdoe@doemail.com", Age: 23},
 		{Name: "Jane Doe", Email: "jadoe@doemail.com", Age: 23},
@@ -56,7 +56,7 @@ func InitDB() {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
-	users := SeedUsers()
+	users := seedUsers()
 
 	for _, v := range users {
 		_, err = stmt.Exec(v.Name, v.Email, v.Age)
