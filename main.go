@@ -9,16 +9,8 @@ import (
 	"time"
 
 	"github.com/jfortez/gogagg/db"
+	"github.com/jfortez/gogagg/middleware"
 )
-
-type contextHandler struct {
-	ctx context.Context
-	h   http.Handler
-}
-
-func (c contextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c.h.ServeHTTP(w, r.WithContext(c.ctx))
-}
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.ParseFiles("./public/index.html"))
@@ -35,6 +27,9 @@ func main() {
 
 	ctx := context.WithValue(context.Background(), dbKey, conn)
 
+	contextMiddleware := middleware.NewContextHandler(ctx)
+	middlewares := middleware.Chain(middleware.Logging, contextMiddleware)
+
 	router := http.NewServeMux()
 
 	dir := http.Dir("./static")
@@ -47,7 +42,7 @@ func main() {
 	GetRoutes(router)
 
 	srv := &http.Server{
-		Handler:      Logging(contextHandler{ctx, router}),
+		Handler:      middlewares(router),
 		Addr:         "127.0.0.1:8000",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
