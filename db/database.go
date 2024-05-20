@@ -15,8 +15,8 @@ type DataBase struct {
 
 func seedUsers() []model.User {
 	Users := []model.User{
-		{Name: "John Doe", Email: "jdoe@doemail.com", Age: 23},
-		{Name: "Jane Doe", Email: "jadoe@doemail.com", Age: 23},
+		{Name: "John Doe", Email: "jdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150"},
+		{Name: "Jane Doe", Email: "jadoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/120"},
 	}
 	return Users
 }
@@ -41,6 +41,7 @@ func (d *DataBase) initDB() {
 		name TEXT,
 		email TEXT,
 		age INTEGER,
+		img TEXT,
 		createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 	);
 	DELETE FROM users;
@@ -54,7 +55,7 @@ func (d *DataBase) initDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("insert into users(name,email,age) values(?, ?, ?)")
+	stmt, err := tx.Prepare("insert into users(name,email,age, img) values(?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,7 +63,7 @@ func (d *DataBase) initDB() {
 
 	users := seedUsers()
 	for _, v := range users {
-		_, err = stmt.Exec(v.Name, v.Email, v.Age)
+		_, err = stmt.Exec(v.Name, v.Email, v.Age, v.Img)
 		if err != nil {
 			log.Fatal(err)
 		}

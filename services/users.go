@@ -9,14 +9,14 @@ import (
 
 func GetUsers(connection *sql.DB) (users []model.User) {
 	// users = make([]User, 0)
-	rows, err := connection.Query("SELECT id,name,email,age,createdAt FROM users")
+	rows, err := connection.Query("SELECT id,name,email,age,img,createdAt FROM users")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user model.User
-		err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.CreatedAt)
+		err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.CreatedAt)
 		users = append(users, user)
 		if err != nil {
 			log.Fatal(err)
@@ -28,14 +28,14 @@ func GetUsers(connection *sql.DB) (users []model.User) {
 
 func GetUser(connection *sql.DB, id string) (user model.User) {
 
-	stmt, err := connection.Prepare("SELECT id,name,email,age,createdAt FROM users WHERE id = ?")
+	stmt, err := connection.Prepare("SELECT id,name,email,age, img,createdAt FROM users WHERE id = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.CreatedAt)
+	err = stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.CreatedAt)
 	if err != nil {
 		log.Fatal(err)
 	}

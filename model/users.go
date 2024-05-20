@@ -9,4 +9,5 @@ type User struct {
 	Email     string    `json:"email"`
 	Age       int       `json:"age"`
 	CreatedAt time.Time `json:"createdAt"`
+	Img       string    `json:"img"`
 }
