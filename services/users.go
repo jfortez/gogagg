@@ -7,6 +7,20 @@ import (
 	"github.com/jfortez/gogagg/model"
 )
 
+func CreateUser(connection *sql.DB, user model.User) {
+	stmt, err := connection.Prepare("INSERT INTO users(name,email,age, img) VALUES(?, ?, ?, ?)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(user.Name, user.Email, user.Age, user.Img)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
 func GetUsers(connection *sql.DB) (users []model.User) {
 	// users = make([]User, 0)
 	rows, err := connection.Query("SELECT id,name,email,age,img,createdAt FROM users")

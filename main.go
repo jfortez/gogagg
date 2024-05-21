@@ -38,6 +38,7 @@ func main() {
 	router.HandleFunc("/", handle)
 
 	router.HandleFunc("POST /create", handleCreate)
+	router.HandleFunc("DELETE /remove/{id}", handleRemove)
 
 	GetRoutes(router)
 
@@ -61,7 +62,6 @@ func handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCreate(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(time.Second * 2)
 	Name := r.PostFormValue("name")
 	Age := r.PostFormValue("age")
 	Email := r.PostFormValue("email")
@@ -71,25 +71,25 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 
 	AgeInt, _ := strconv.Atoi(Age)
 
-	db := r.Context().Value(dbKey).(*db.DataBase).Connection
-
-	stmt, err := db.Prepare("INSERT INTO users(name,email,age, img) VALUES(?, ?, ?, ?)")
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer stmt.Close()
-
-	_, err = stmt.Exec(Name, Email, AgeInt, Image)
-	if err != nil {
-		panic(err)
-	}
-
-	tpl.ExecuteTemplate(w, "user-element", model.User{
+	currentUser := model.User{
 		Name:  Name,
 		Age:   AgeInt,
 		Email: Email,
 		Img:   Image,
-	})
+	}
+
+	db := r.Context().Value(dbKey).(*db.DataBase).Connection
+	services.CreateUser(db, currentUser)
+
+	tpl.ExecuteTemplate(w, "user-element", currentUser)
+}
+
+func handleRemove(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	db := r.Context().Value(dbKey).(*db.DataBase).Connection
+
+	services.DeleteUser(db, id)
+
+	w.WriteHeader(http.StatusOK)
+
 }

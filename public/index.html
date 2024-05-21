@@ -91,7 +91,13 @@
 
       <h4 class="text-xl text-white font-bold">User List</h4>
 
-      <ul id="user-list" class="divide-y divide-gray-200 dark:divide-gray-700 w-full max-w-md">
+      <ul
+        id="user-list"
+        class="divide-y divide-gray-200 dark:divide-gray-700 w-full max-w-md"
+        hx-confirm="Are you sure?"
+        hx-target="closest li"
+        hx-swap="outerHTML swap:1s"
+      >
         {{ range .}} {{ block "user-element" .}}
         <li class="pb-3 pt:3 sm:pt-4 sm:pb-4">
           <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -111,6 +117,7 @@
             </div>
             <button
               type="button"
+              hx-delete="/remove/{{.Id}}"
               class="text-red-700 border border-red-700 hover:bg-red-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:focus:ring-red-800 dark:hover:bg-red-500 justify-center"
             >
               <svg

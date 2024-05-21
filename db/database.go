@@ -17,6 +17,9 @@ func seedUsers() []model.User {
 	Users := []model.User{
 		{Name: "John Doe", Email: "jdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150"},
 		{Name: "Jane Doe", Email: "jadoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/120"},
+		{Name: "Alex Doe", Email: "adoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150"},
+		{Name: "Xavier Doe", Email: "xdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/120"},
+		{Name: "Sam Doe", Email: "sdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150"},
 	}
 	return Users
 }
