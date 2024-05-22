@@ -15,6 +15,7 @@ import (
 	"github.com/jfortez/gogagg/db"
 	"github.com/jfortez/gogagg/model"
 	"github.com/jfortez/gogagg/services"
+	"github.com/jfortez/gogagg/web/templates"
 	"github.com/joho/godotenv"
 )
 
@@ -45,6 +46,10 @@ func main() {
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// WEB
 	router.HandleFunc("/", handle)
+	router.HandleFunc("/ui", func(w http.ResponseWriter, r *http.Request) {
+		component := templates.Hello("Hello World")
+		component.Render(r.Context(), w)
+	})
 	router.HandleFunc("POST /create", handleCreate)
 	router.HandleFunc("DELETE /remove/{id}", handleRemove)
 
