@@ -1,3 +1,4 @@
 node_modules
 sql.db
 static/css/output.css
+.env

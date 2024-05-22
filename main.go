@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"text/template"
 	"time"
@@ -13,12 +14,19 @@ import (
 	"github.com/jfortez/gogagg/middleware"
 	"github.com/jfortez/gogagg/model"
 	"github.com/jfortez/gogagg/services"
+	"github.com/joho/godotenv"
 )
 
 const dbKey = "db"
 
 func main() {
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	ADDRESS := os.Getenv("ADDRESS")
 	conn := db.New()
 
 	defer conn.Close()
@@ -44,7 +52,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      middlewares(router),
-		Addr:         "127.0.0.1:8000",
+		Addr:         ADDRESS,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
