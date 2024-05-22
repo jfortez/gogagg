@@ -8,7 +8,7 @@ import (
 )
 
 func CreateUser(connection *sql.DB, user model.User) {
-	stmt, err := connection.Prepare("INSERT INTO users(name,email,age, img) VALUES(?, ?, ?, ?)")
+	stmt, err := connection.Prepare("INSERT INTO users(name,email,age,img) VALUES(?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}

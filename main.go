@@ -10,8 +10,9 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/jfortez/gogagg/api"
+	"github.com/jfortez/gogagg/api/middleware"
 	"github.com/jfortez/gogagg/db"
-	"github.com/jfortez/gogagg/middleware"
 	"github.com/jfortez/gogagg/model"
 	"github.com/jfortez/gogagg/services"
 	"github.com/joho/godotenv"
@@ -38,17 +39,17 @@ func main() {
 
 	router := http.NewServeMux()
 
-	dir := http.Dir("./static")
+	// STATIC
+	dir := http.Dir("./web/static")
 	fs := http.FileServer(dir)
-
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
-
+	// WEB
 	router.HandleFunc("/", handle)
-
 	router.HandleFunc("POST /create", handleCreate)
 	router.HandleFunc("DELETE /remove/{id}", handleRemove)
 
-	GetRoutes(router)
+	// API
+	api.GetRoutes(router)
 
 	srv := &http.Server{
 		Handler:      middlewares(router),
@@ -63,7 +64,7 @@ func main() {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-	tpl := template.Must(template.ParseFiles("./public/index.html"))
+	tpl := template.Must(template.ParseFiles("./web/index.html"))
 	userList := services.GetUsers(r.Context().Value(dbKey).(*db.DataBase).Connection)
 
 	tpl.Execute(w, userList)
@@ -75,7 +76,7 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 	Email := r.PostFormValue("email")
 	Image := "https://cdn-icons-png.freepik.com/512/6596/6596121.png"
 
-	tpl := template.Must(template.ParseFiles("./public/index.html"))
+	tpl := template.Must(template.ParseFiles("./web/index.html"))
 
 	AgeInt, _ := strconv.Atoi(Age)
 
