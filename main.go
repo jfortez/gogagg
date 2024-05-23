@@ -47,7 +47,8 @@ func main() {
 	// WEB
 	router.HandleFunc("/", handle)
 	router.HandleFunc("/ui", func(w http.ResponseWriter, r *http.Request) {
-		component := templates.Hello("Hello World")
+		users := services.GetUsers(r.Context().Value(dbKey).(*db.DataBase).Connection)
+		component := templates.Hello(users)
 		component.Render(r.Context(), w)
 	})
 	router.HandleFunc("POST /create", handleCreate)

@@ -25,9 +25,9 @@ func seedUsers() []model.User {
 }
 
 func New() *DataBase {
-	os.Remove("./sql.db")
+	os.Remove("./db/sql.db")
 
-	db, err := sql.Open("sqlite3", "./sql.db")
+	db, err := sql.Open("sqlite3", "./db/sql.db")
 	if err != nil {
 		panic(err)
 	}
@@ -39,6 +39,7 @@ func New() *DataBase {
 
 func (d *DataBase) initDB() {
 	sqlStmt := `
+	DROP TABLE IF EXISTS users;
 	CREATE TABLE users (
 		id INTEGER NOT NULL PRIMARY KEY,
 		name TEXT,
