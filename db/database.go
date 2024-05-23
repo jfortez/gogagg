@@ -32,12 +32,10 @@ func New() *DataBase {
 		panic(err)
 	}
 
-	database := &DataBase{Connection: db}
-	database.initDB()
-	return database
+	return &DataBase{Connection: db}
 }
 
-func (d *DataBase) initDB() {
+func (d *DataBase) InitDB() {
 	sqlStmt := `
 	DROP TABLE IF EXISTS users;
 	CREATE TABLE users (

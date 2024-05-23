@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,11 +30,12 @@ func main() {
 	}
 
 	ADDRESS := os.Getenv("ADDRESS")
-	conn := db.New()
+	dbConn := db.New()
+	defer dbConn.Close()
 
-	defer conn.Close()
+	dbConn.InitDB()
 
-	ctx := context.WithValue(context.Background(), dbKey, conn)
+	ctx := context.WithValue(context.Background(), dbKey, dbConn.Connection)
 
 	contextMiddleware := middleware.NewContextHandler(ctx)
 	middlewares := middleware.Chain(middleware.Logging, contextMiddleware)
@@ -45,12 +47,8 @@ func main() {
 	fs := http.FileServer(dir)
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// WEB
-	router.HandleFunc("/", handle)
-	router.HandleFunc("/ui", func(w http.ResponseWriter, r *http.Request) {
-		users := services.GetUsers(r.Context().Value(dbKey).(*db.DataBase).Connection)
-		component := templates.Hello(users)
-		component.Render(r.Context(), w)
-	})
+	router.HandleFunc("/", HandleUserView)
+
 	router.HandleFunc("POST /create", handleCreate)
 	router.HandleFunc("DELETE /remove/{id}", handleRemove)
 
@@ -69,11 +67,10 @@ func main() {
 
 }
 
-func handle(w http.ResponseWriter, r *http.Request) {
-	tpl := template.Must(template.ParseFiles("./web/index.html"))
-	userList := services.GetUsers(r.Context().Value(dbKey).(*db.DataBase).Connection)
-
-	tpl.Execute(w, userList)
+func HandleUserView(w http.ResponseWriter, r *http.Request) {
+	users := services.GetUsers(r.Context().Value(dbKey).(*sql.DB))
+	component := templates.Hello(users)
+	component.Render(r.Context(), w)
 }
 
 func handleCreate(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +90,7 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 		Img:   Image,
 	}
 
-	db := r.Context().Value(dbKey).(*db.DataBase).Connection
+	db := r.Context().Value(dbKey).(*sql.DB)
 	services.CreateUser(db, currentUser)
 
 	tpl.ExecuteTemplate(w, "user-element", currentUser)
@@ -101,7 +98,7 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 
 func handleRemove(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	db := r.Context().Value(dbKey).(*db.DataBase).Connection
+	db := r.Context().Value(dbKey).(*sql.DB)
 
 	services.DeleteUser(db, id)
 
