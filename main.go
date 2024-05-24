@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"text/template"
 	"time"
 
 	"github.com/jfortez/gogagg/api"
@@ -32,7 +31,6 @@ func main() {
 	ADDRESS := os.Getenv("ADDRESS")
 	dbConn := db.New()
 	defer dbConn.Close()
-
 	dbConn.InitDB()
 
 	ctx := context.WithValue(context.Background(), dbKey, dbConn.Connection)
@@ -47,13 +45,14 @@ func main() {
 	fs := http.FileServer(dir)
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// WEB
-	router.HandleFunc("/", HandleUserView)
+	router.HandleFunc("/", http.HandlerFunc(handleUserView))
+	router.HandleFunc("/todos", handleTodosView)
 
 	router.HandleFunc("POST /create", handleCreate)
 	router.HandleFunc("DELETE /remove/{id}", handleRemove)
 
 	// API
-	api.GetRoutes(router)
+	api.GetRoutes(router, dbConn.Connection)
 
 	srv := &http.Server{
 		Handler:      middlewares(router),
@@ -67,7 +66,12 @@ func main() {
 
 }
 
-func HandleUserView(w http.ResponseWriter, r *http.Request) {
+func handleTodosView(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Todos"))
+}
+
+func handleUserView(w http.ResponseWriter, r *http.Request) {
 	users := services.GetUsers(r.Context().Value(dbKey).(*sql.DB))
 	component := templates.Hello(users)
 	component.Render(r.Context(), w)
@@ -78,8 +82,6 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 	Age := r.PostFormValue("age")
 	Email := r.PostFormValue("email")
 	Image := "https://cdn-icons-png.freepik.com/512/6596/6596121.png"
-
-	tpl := template.Must(template.ParseFiles("./web/index.html"))
 
 	AgeInt, _ := strconv.Atoi(Age)
 
@@ -93,7 +95,6 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value(dbKey).(*sql.DB)
 	services.CreateUser(db, currentUser)
 
-	tpl.ExecuteTemplate(w, "user-element", currentUser)
 }
 
 func handleRemove(w http.ResponseWriter, r *http.Request) {

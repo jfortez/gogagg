@@ -9,51 +9,71 @@ import (
 	"github.com/jfortez/gogagg/services"
 )
 
-func UsersHandle(w http.ResponseWriter, r *http.Request) {
+type userHandler struct {
+	db *sql.DB
+}
 
-	connection, ok := r.Context().Value("db").(*sql.DB)
-	if !ok {
+func NewUserHandler(db *sql.DB) *userHandler {
+	return &userHandler{db: db}
+}
+
+func (h *userHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
+
+	if h.db == nil {
 		http.Error(w, "Database connection not found", http.StatusInternalServerError)
 		return
 	}
 
-	userList := services.GetUsers(connection)
+	userList := services.GetUsers(h.db)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userList)
 }
 
-func UserHandle(w http.ResponseWriter, r *http.Request) {
-	connection, ok := r.Context().Value("db").(*sql.DB)
+func (h *userHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	if h.db == nil {
+		http.Error(w, "Database connection not found", http.StatusInternalServerError)
+		return
+	}
+	var user model.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		panic(err)
+	}
 
-	if !ok {
+	services.CreateUser(h.db, user)
+
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (h *userHandler) GetUserHandler(w http.ResponseWriter, r *http.Request) {
+
+	if h.db == nil {
 		http.Error(w, "Database connection not found", http.StatusInternalServerError)
 		return
 	}
 	id := r.PathValue("id")
-	userList := services.GetUser(connection, id)
+	userList := services.GetUser(h.db, id)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(userList)
 
 }
-func DeleteUserHandle(w http.ResponseWriter, r *http.Request) {
-	connection, ok := r.Context().Value("db").(*sql.DB)
+func (h *userHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	if !ok {
+	if h.db == nil {
 		http.Error(w, "Database connection not found", http.StatusInternalServerError)
 		return
 	}
 	id := r.PathValue("id")
 	w.WriteHeader(http.StatusOK)
-	services.DeleteUser(connection, id)
+	services.DeleteUser(h.db, id)
 }
 
-func UpdateUserHandle(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	connection, ok := r.Context().Value("db").(*sql.DB)
-
-	if !ok {
+	if h.db == nil {
 		http.Error(w, "Database connection not found", http.StatusInternalServerError)
 		return
 	}
@@ -64,5 +84,5 @@ func UpdateUserHandle(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	w.WriteHeader(http.StatusOK)
-	services.UpdateUser(connection, user)
+	services.UpdateUser(h.db, user)
 }
