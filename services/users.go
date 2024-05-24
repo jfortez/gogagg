@@ -7,30 +7,29 @@ import (
 	"github.com/jfortez/gogagg/model"
 )
 
-func CreateUser(connection *sql.DB, user model.User) {
-	stmt, err := connection.Prepare("INSERT INTO users(name,email,age,img) VALUES(?, ?, ?, ?)")
+func CreateUser(connection *sql.DB, user model.User) error {
+	stmt, err := connection.Prepare("INSERT INTO users(name,email,age,img, password, description) VALUES(?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Name, user.Email, user.Age, user.Img)
+	_, err = stmt.Exec(user.Name, user.Email, user.Age, user.Img, user.Password, user.Description)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
+	return nil
 }
 
 func GetUsers(connection *sql.DB) (users []model.User) {
-	// users = make([]User, 0)
-	rows, err := connection.Query("SELECT id,name,email,age,img,createdAt FROM users")
+	rows, err := connection.Query("SELECT id,name,email,age,img,password,description,createdAt FROM users WHERE password IS NOT NULL")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var user model.User
-		err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.CreatedAt)
+		err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.Password, &user.Description, &user.CreatedAt)
 		users = append(users, user)
 		if err != nil {
 			log.Fatal(err)
@@ -40,16 +39,38 @@ func GetUsers(connection *sql.DB) (users []model.User) {
 	return
 }
 
+func FindAuthUser(connection *sql.DB, email string, password string) (user model.User, err error) {
+	stmt, err := connection.Prepare("SELECT id,name,email,age,img,description,createdAt FROM users WHERE email = ? AND password = ?")
+	if err != nil {
+		return user, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(email, password)
+
+	if row.Err() != nil {
+		return user, row.Err()
+	}
+
+	err = row.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.Description, &user.CreatedAt)
+
+	if err != nil {
+		return user, err
+	}
+
+	return
+}
+
 func GetUser(connection *sql.DB, id string) (user model.User) {
 
-	stmt, err := connection.Prepare("SELECT id,name,email,age, img,createdAt FROM users WHERE id = ?")
+	stmt, err := connection.Prepare("SELECT id,name,email,age,img,password,description,createdAt FROM users WHERE id = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.CreatedAt)
+	err = stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.Password, &user.Description, &user.CreatedAt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,13 +91,13 @@ func DeleteUser(connection *sql.DB, id string) {
 	}
 }
 func UpdateUser(connection *sql.DB, user model.User) {
-	stmt, err := connection.Prepare("UPDATE users SET name=?, email=?, age=? WHERE id = ?")
+	stmt, err := connection.Prepare("UPDATE users SET name=?, email=?, age=?, password=?, description=? WHERE id = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Name, user.Email, user.Age, user.Id)
+	_, err = stmt.Exec(user.Name, user.Email, user.Age, user.Id, user.Password, user.Description)
 	if err != nil {
 		log.Fatal(err)
 	}

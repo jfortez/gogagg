@@ -15,11 +15,7 @@ type DataBase struct {
 
 func seedUsers() []model.User {
 	Users := []model.User{
-		{Name: "John Doe", Email: "jdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150"},
-		{Name: "Jane Doe", Email: "jadoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/120"},
-		{Name: "Alex Doe", Email: "adoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150"},
-		{Name: "Xavier Doe", Email: "xdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/120"},
-		{Name: "Sam Doe", Email: "sdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150"},
+		{Name: "John Doe", Email: "jdoe@doemail.com", Age: 23, Img: "https://i.pravatar.cc/150", Password: "123456", Description: "A simple todo app built with Go and Tailwind CSS"},
 	}
 	return Users
 }
@@ -40,11 +36,13 @@ func (d *DataBase) InitDB() {
 	DROP TABLE IF EXISTS users;
 	CREATE TABLE users (
 		id INTEGER NOT NULL PRIMARY KEY,
-		name TEXT,
-		email TEXT,
+		name TEXT NOT NULL,
+		email TEXT NOT NULL,
 		age INTEGER,
 		img TEXT,
-		createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+		createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+		password TEXT NOT NULL,
+		description TEXT
 	);
 	DELETE FROM users;
 	`
@@ -57,7 +55,7 @@ func (d *DataBase) InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("insert into users(name,email,age, img) values(?, ?, ?, ?)")
+	stmt, err := tx.Prepare("insert into users(name,email,age,img, password, description) values(?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,7 +63,7 @@ func (d *DataBase) InitDB() {
 
 	users := seedUsers()
 	for _, v := range users {
-		_, err = stmt.Exec(v.Name, v.Email, v.Age, v.Img)
+		_, err = stmt.Exec(v.Name, v.Email, v.Age, v.Img, v.Password, v.Description)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -46,10 +47,11 @@ func main() {
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// WEB
 	router.HandleFunc("/", http.HandlerFunc(handleUserView))
-	router.HandleFunc("/todos", handleTodosView)
+	router.HandleFunc("/login", http.HandlerFunc(handleLoginView))
+	router.HandleFunc("/register", http.HandlerFunc(handleRegisterView))
 
-	router.HandleFunc("POST /create", handleCreate)
-	router.HandleFunc("DELETE /remove/{id}", handleRemove)
+	router.HandleFunc("POST /login", handleLogin)
+	router.HandleFunc("POST /register", handleRegister)
 
 	// API
 	api.GetRoutes(router, dbConn.Connection)
@@ -61,48 +63,101 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
+	defer srv.Close()
 	fmt.Println("Server listening on localhost:8000")
 	log.Fatal(srv.ListenAndServe())
 
 }
 
-func handleTodosView(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Todos"))
+func handleLoginView(w http.ResponseWriter, r *http.Request) {
+	templates.Login().Render(r.Context(), w)
+}
+func handleRegisterView(w http.ResponseWriter, r *http.Request) {
+	templates.Register().Render(r.Context(), w)
 }
 
 func handleUserView(w http.ResponseWriter, r *http.Request) {
-	users := services.GetUsers(r.Context().Value(dbKey).(*sql.DB))
-	component := templates.Hello(users)
+	component := templates.Index()
 	component.Render(r.Context(), w)
 }
 
-func handleCreate(w http.ResponseWriter, r *http.Request) {
-	Name := r.PostFormValue("name")
-	Age := r.PostFormValue("age")
-	Email := r.PostFormValue("email")
-	Image := "https://cdn-icons-png.freepik.com/512/6596/6596121.png"
+func handleLogin(w http.ResponseWriter, r *http.Request) {
 
-	AgeInt, _ := strconv.Atoi(Age)
+	var requestUser model.User
+	err := json.NewDecoder(r.Body).Decode(&requestUser)
 
-	currentUser := model.User{
-		Name:  Name,
-		Age:   AgeInt,
-		Email: Email,
-		Img:   Image,
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	db := r.Context().Value(dbKey).(*sql.DB)
-	services.CreateUser(db, currentUser)
+
+	user, err := services.FindAuthUser(db, requestUser.Email, requestUser.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	cookie := http.Cookie{
+		Name:     "user",
+		Value:    strconv.Itoa(user.Id),
+		Path:     "/",
+		Expires:  time.Now().Add(time.Hour * 24 * 365),
+		Secure:   true,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
+	w.Header().Set("HX-Redirect", "/")
+	message := map[string]string{
+		"message": "User logged in successfully",
+	}
+	json.NewEncoder(w).Encode(message)
 
 }
 
-func handleRemove(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+func handleRegister(w http.ResponseWriter, r *http.Request) {
+	var requestUser struct {
+		model.User
+		ConfirmPassword string `json:"confirmPassword"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&requestUser)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if requestUser.Password != requestUser.ConfirmPassword {
+		http.Error(w, "Passwords do not match", http.StatusBadRequest)
+		return
+	}
+
 	db := r.Context().Value(dbKey).(*sql.DB)
 
-	services.DeleteUser(db, id)
+	if requestUser.Img == "" {
+		requestUser.Img = "https://cdn-icons-png.freepik.com/512/6596/6596121.png"
+	}
 
-	w.WriteHeader(http.StatusOK)
+	err = services.CreateUser(db, model.User{
+		Name:        requestUser.Name,
+		Age:         requestUser.Age,
+		Email:       requestUser.Email,
+		Img:         requestUser.Img,
+		Password:    requestUser.Password,
+		Description: requestUser.Description,
+	})
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("HX-Redirect", "/")
+
+	message := map[string]string{
+		"message": "User created successfully",
+	}
+	json.NewEncoder(w).Encode(message)
 }
