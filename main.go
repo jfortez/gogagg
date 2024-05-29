@@ -259,7 +259,14 @@ func handleUserView(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
-	component := templates.Index()
+	db := r.Context().Value(dbKey).(*sql.DB)
+	chatList, err := services.GetMessageListByCurrentUser(db, 1)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+
+	}
+	component := templates.Index(chatList)
 	component.Render(r.Context(), w)
 }
 
