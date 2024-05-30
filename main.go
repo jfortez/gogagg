@@ -204,7 +204,7 @@ func main() {
 	ADDRESS := os.Getenv("ADDRESS")
 	dbConn := db.New()
 	defer dbConn.Close()
-	dbConn.InitDB()
+	go dbConn.InitDB()
 
 	hub := newHub()
 	go hub.run()
