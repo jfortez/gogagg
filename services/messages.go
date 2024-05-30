@@ -34,10 +34,10 @@ func UpdateMessageStatus(connection *sql.DB, message model.Message) error {
 	return nil
 }
 
-func GetMessages(connection *sql.DB, fromUserId int, toUserId int) (messages []model.Message) {
+func GetMessages(connection *sql.DB, fromUserId int, toUserId int) (messages []model.Message, err error) {
 	rows, err := connection.Query("SELECT id,content,createdAt,updatedAt,status,fromUserId,toUserId FROM messages WHERE fromUserId = ? AND toUserId = ?", fromUserId, toUserId)
 	if err != nil {
-		return messages
+		return messages, err
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -45,7 +45,7 @@ func GetMessages(connection *sql.DB, fromUserId int, toUserId int) (messages []m
 		err = rows.Scan(&message.Id, &message.Content, &message.CreatedAt, &message.UpdatedAt, &message.Status, &message.FromUserId, &message.ToUserId)
 		messages = append(messages, message)
 		if err != nil {
-			return messages
+			return messages, err
 		}
 	}
 
