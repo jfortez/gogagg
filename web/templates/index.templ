@@ -2,6 +2,7 @@ package templates
 
 import "github.com/jfortez/gogagg/web/templates/layouts"
 import "github.com/jfortez/gogagg/model"
+import "fmt"
 import "strconv"
 
 templ Index(requestedMessages []model.RequestedMessages) {
@@ -68,14 +69,16 @@ templ Index(requestedMessages []model.RequestedMessages) {
 					</div>
 					<ul id="messages-list" class="divide-y divide-gray-100 dark:divide-gray-700 space-y-1 -mx-4">
 						for _, requestedMessage := range requestedMessages {
-							<li class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-								<img src="https://cdn-icons-png.freepik.com/512/6596/6596121.png" class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
-								<div class="flex-1 min-w-0">
-									<div class="text-sm font-medium text-gray-900 dark:text-white truncate">{ requestedMessage.RequestedUserName }</div>
-									<div class="text-xs text-gray-500 dark:text-gray-300 truncate w-full">
-										{ requestedMessage.Content }
+							<li>
+								<a href={ templ.URL(fmt.Sprintf("/message/%v", requestedMessage.MessageId)) } class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white hover:cursor-pointer">
+									<img src="https://cdn-icons-png.freepik.com/512/6596/6596121.png" class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
+									<div class="flex-1 min-w-0">
+										<div class="text-sm font-medium text-gray-900 dark:text-white truncate">{ requestedMessage.RequestedUserName }</div>
+										<div class="text-xs text-gray-500 dark:text-gray-300 truncate w-full">
+											{ requestedMessage.Content }
+										</div>
 									</div>
-								</div>
+								</a>
 							</li>
 						}
 					</ul>

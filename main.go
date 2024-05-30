@@ -221,7 +221,7 @@ func main() {
 	fs := http.FileServer(dir)
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// WEB
-	router.HandleFunc("/", http.HandlerFunc(handleUserView))
+	router.HandleFunc("/", http.HandlerFunc(handleChatView))
 	router.HandleFunc("/login", http.HandlerFunc(handleLoginView))
 	router.HandleFunc("/register", http.HandlerFunc(handleRegisterView))
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -254,7 +254,7 @@ func handleRegisterView(w http.ResponseWriter, r *http.Request) {
 	templates.Register().Render(r.Context(), w)
 }
 
-func handleUserView(w http.ResponseWriter, r *http.Request) {
+func handleChatView(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return

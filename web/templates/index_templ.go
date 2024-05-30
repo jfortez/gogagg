@@ -12,6 +12,7 @@ import "bytes"
 
 import "github.com/jfortez/gogagg/web/templates/layouts"
 import "github.com/jfortez/gogagg/model"
+import "fmt"
 import "strconv"
 
 func Index(requestedMessages []model.RequestedMessages) templ.Component {
@@ -40,7 +41,7 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(requestedMessages)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 61, Col: 159}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 62, Col: 159}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -51,16 +52,25 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, requestedMessage := range requestedMessages {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white\"><img src=\"https://cdn-icons-png.freepik.com/512/6596/6596121.png\" class=\"w-10 h-10 min-w-10 min-h-10 rounded-full\" alt=\"avatar\"><div class=\"flex-1 min-w-0\"><div class=\"text-sm font-medium text-gray-900 dark:text-white truncate\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(requestedMessage.RequestedUserName)
+				var templ_7745c5c3_Var4 templ.SafeURL = templ.URL(fmt.Sprintf("/message/%v", requestedMessage.MessageId))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 74, Col: 117}
+					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white hover:cursor-pointer\"><img src=\"https://cdn-icons-png.freepik.com/512/6596/6596121.png\" class=\"w-10 h-10 min-w-10 min-h-10 rounded-full\" alt=\"avatar\"><div class=\"flex-1 min-w-0\"><div class=\"text-sm font-medium text-gray-900 dark:text-white truncate\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(requestedMessage.RequestedUserName)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 76, Col: 118}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -68,16 +78,16 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(requestedMessage.Content)
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(requestedMessage.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 76, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 78, Col: 37}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></li>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></a></li>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
