@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -19,7 +18,7 @@ import (
 	"github.com/jfortez/gogagg/model"
 	"github.com/jfortez/gogagg/services"
 	"github.com/jfortez/gogagg/web/templates"
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 const dbKey = "db"
@@ -196,12 +195,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 }
 func main() {
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	ADDRESS := os.Getenv("ADDRESS")
+	// ADDRESS := os.Getenv("ADDRESS")
 	dbConn := db.New()
 	defer dbConn.Close()
 	go dbConn.InitDB()
@@ -237,13 +231,14 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      middlewares(router),
-		Addr:         ADDRESS,
+		Addr:         ":8000",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	defer srv.Close()
-	fmt.Println("Server listening on localhost:8000")
+	// defer srv.Close()
+
+	fmt.Println("Server Listening on localhost:8000")
 	log.Fatal(srv.ListenAndServe())
 
 }
