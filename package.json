@@ -4,7 +4,8 @@
   "description": "",
   "main": "tailwind.config.js",
   "scripts": {
-    "watch": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css -w"
+    "watch": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css -w",
+    "build": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css"
   },
   "keywords": [],
   "author": "",

@@ -25,6 +25,15 @@ RUN go build \
 RUN upx app
 
 
+#node stage
+FROM node:20.9.0-alpine3.19 AS NODE
+
+WORKDIR /app
+COPY ["package.json", "package-lock.json", "./"]
+RUN npm install
+COPY . .
+RUN npm run build
+
 
 # final stage
 FROM alpine:3.19
