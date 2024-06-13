@@ -6,7 +6,7 @@ require (
 	github.com/a-h/templ v0.2.697
 	github.com/gorilla/websocket v1.5.1
 	github.com/joho/godotenv v1.5.1
-	github.com/mattn/go-sqlite3 v1.14.22
+	github.com/lib/pq v1.10.9
 )
 
 require golang.org/x/net v0.24.0 // indirect

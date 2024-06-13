@@ -14,7 +14,7 @@ func CreateUser(connection *sql.DB, user model.User) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Name, user.Email, user.Age, user.Img, user.Password, user.Description)
+	_, err = stmt.Exec(user.Name, user.Email, user.Age, user.Avatar, user.Password, user.Description)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func GetUsers(connection *sql.DB) (users []model.User) {
 	defer rows.Close()
 	for rows.Next() {
 		var user model.User
-		err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.Password, &user.Description, &user.CreatedAt)
+		err = rows.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Avatar, &user.Password, &user.Description, &user.CreatedAt)
 		users = append(users, user)
 		if err != nil {
 			log.Fatal(err)
@@ -52,7 +52,7 @@ func FindAuthUser(connection *sql.DB, email string, password string) (user model
 		return user, row.Err()
 	}
 
-	err = row.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.Description, &user.CreatedAt)
+	err = row.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Avatar, &user.Description, &user.CreatedAt)
 
 	if err != nil {
 		return user, err
@@ -70,7 +70,7 @@ func GetUser(connection *sql.DB, id string) (user model.User) {
 
 	defer stmt.Close()
 
-	err = stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Img, &user.Password, &user.Description, &user.CreatedAt)
+	err = stmt.QueryRow(id).Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Avatar, &user.Password, &user.Description, &user.CreatedAt)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -54,7 +54,7 @@ func GetMessages(connection *sql.DB, fromUserId int, toUserId int) (messages []m
 
 func GetMessageListByCurrentUser(connection *sql.DB, userId int) (messages []model.RequestedMessages, err error) {
 
-	rows, err := connection.Query("SELECT m.id, m.content, u.id, u.name FROM messages m JOIN users u ON m.fromUserId = u.id WHERE m.toUserId = ?", userId)
+	rows, err := connection.Query("SELECT m.id, m.content, u.id, u.name FROM messages m JOIN users u ON m.fromuserid = u.id WHERE m.touserid = $1", userId)
 
 	if err != nil {
 		return messages, err

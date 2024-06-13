@@ -197,8 +197,6 @@ func main() {
 
 	// ADDRESS := os.Getenv("ADDRESS")
 	dbConn := db.New()
-	defer dbConn.Close()
-	go dbConn.InitDB()
 
 	hub := newHub()
 	go hub.run()
@@ -337,15 +335,15 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 
 	db := r.Context().Value(dbKey).(*sql.DB)
 
-	if requestUser.Img == "" {
-		requestUser.Img = "https://cdn-icons-png.freepik.com/512/6596/6596121.png"
+	if requestUser.Avatar == "" {
+		requestUser.Avatar = "https://cdn-icons-png.freepik.com/512/6596/6596121.png"
 	}
 
 	err = services.CreateUser(db, model.User{
 		Name:        requestUser.Name,
 		Age:         requestUser.Age,
 		Email:       requestUser.Email,
-		Img:         requestUser.Img,
+		Avatar:      requestUser.Avatar,
 		Password:    requestUser.Password,
 		Description: requestUser.Description,
 	})

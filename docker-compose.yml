@@ -5,8 +5,10 @@ services:
     container_name: pg_gogag
     image: postgres:16.3-alpine3.19
     ports:
-      - 5433:5433
+      - 5432:5432
     environment:
       - POSTGRES_PASSWORD=root
       - POSTGRES_USER=root
       - POSTGRES_DB=gogag
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/db.sql
