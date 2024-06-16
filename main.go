@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -223,6 +222,7 @@ func main() {
 	})
 
 	router.HandleFunc("POST /sendMessage", handleSendMessage)
+	router.HandleFunc("POST /message", handleMessage)
 	router.HandleFunc("POST /login", handleLogin)
 	router.HandleFunc("POST /register", handleRegister)
 
@@ -243,6 +243,33 @@ func main() {
 
 }
 
+func handleMessage(w http.ResponseWriter, r *http.Request) {
+
+	vals := model.RequestedMessages{}
+	err := json.NewDecoder(r.Body).Decode(&vals)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db := r.Context().Value(dbKey).(*sql.DB)
+	messages, err := services.GetMessages(db, vals.UserId, 1)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	currentUser := model.CurrentChatUser{
+		UserId:              vals.UserId,
+		UserName:            vals.UserName,
+		LastInteractionTime: vals.UpdatedAt,
+	}
+
+	chatContent := templates.ChatContent(messages, currentUser)
+	chatContent.Render(r.Context(), w)
+
+}
+
 func handleSendMessage(w http.ResponseWriter, r *http.Request) {
 	requestedMessage := model.RequestMessage{}
 
@@ -259,7 +286,7 @@ func handleSendMessage(w http.ResponseWriter, r *http.Request) {
 		Content:    requestedMessage.Content,
 		Status:     "delivered",
 		FromUserId: 1,
-		ToUserId:   2,
+		ToUserId:   requestedMessage.UserId,
 	}
 	err = services.SendMessage(db, newMessage)
 
@@ -268,31 +295,10 @@ func handleSendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	html := `
-<li id="message-item" class="flex items-start gap-2.5 justify-start flex-row-reverse">
-	<img src="https://cdn-icons-png.freepik.com/512/6596/6596121.png" class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
-	<div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-lg dark:bg-gray-700">
-		<div class="flex items-center space-x-2 rtl:space-x-reverse">
-			<span class="text-sm font-semibold text-gray-900 dark:text-white">{USER}</span>
-			<span class="text-sm font-normal text-gray-500 dark:text-gray-400">11:46</span>
-		</div>
-		<p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{CONTENT}</p>
-		<span class="text-sm font-normal text-gray-500 dark:text-gray-400">{STATUS}</span>
-	</div>
-</li>
-	`
-	html = strings.ReplaceAll(html, "{USER}", "John Doe")
-	html = strings.ReplaceAll(html, "{CONTENT}", requestedMessage.Content)
-	html = strings.ReplaceAll(html, "{STATUS}", newMessage.Status)
+	chatItem := templates.MessageItem(model.ChatMessage{FromUserId: newMessage.FromUserId, FromUserName: "John Doe", MessageContent: newMessage.Content, MessageStatus: newMessage.Status})
 
-	_, err = w.Write([]byte(html))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	chatItem.Render(r.Context(), w)
 
-	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusOK)
 }
 func handleLoginView(w http.ResponseWriter, r *http.Request) {
 	templates.Login().Render(r.Context(), w)
@@ -313,12 +319,8 @@ func handleChatView(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	messages, err := services.GetMessages(db, 1, 2)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	component := templates.Index(chatList, messages)
+
+	component := templates.Index(chatList)
 	component.Render(r.Context(), w)
 }
 

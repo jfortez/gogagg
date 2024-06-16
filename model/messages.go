@@ -34,7 +34,10 @@ type RequestedMessages struct {
 }
 
 type RequestMessage struct {
-	Content string `json:"content"`
+	Content             string    `json:"content"`
+	UserId              int       `json:"userId"`
+	UserName            string    `json:"userName"`
+	LastInteractionTime time.Time `json:"lastInteractionTime"`
 }
 
 type CreateMessage struct {
@@ -42,4 +45,10 @@ type CreateMessage struct {
 	Status     string `json:"status"`
 	FromUserId int    `json:"fromUserId"`
 	ToUserId   int    `json:"toUserId"`
+}
+
+type CurrentChatUser struct {
+	UserId              int       `json:"userId"`
+	UserName            string    `json:"userName"`
+	LastInteractionTime time.Time `json:"lastInteractionTime"`
 }
