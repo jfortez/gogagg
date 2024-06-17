@@ -72,7 +72,7 @@ templ Index(requestedMessages []model.RequestedMessages) {
 								hx-vals={ toJSON(requestedMessage) }
 								class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white hover:cursor-pointer"
 							>
-								<img src="https://cdn-icons-png.freepik.com/512/6596/6596121.png" class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
+								<img src={ requestedMessage.UserAvatar } class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
 								<div class="flex-1 min-w-0">
 									<div class="text-sm font-medium text-gray-900 dark:text-white truncate">{ requestedMessage.UserName }</div>
 									<div class="text-xs text-gray-500 dark:text-gray-300 truncate w-full">
@@ -108,7 +108,7 @@ templ ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUse
 				class="flex items-center justify-between py-2 px-4 border-b border-gray-100 dark:border-gray-700  h-12"
 			>
 				<div class="flex items-center gap-2">
-					<img src="https://cdn-icons-png.freepik.com/512/6596/6596121.png" class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
+					<img src={ currentUser.Avatar } class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
 					<div class="flex flex-col">
 						<div class="text-sm font-medium text-gray-900 dark:text-white">{ currentUser.UserName }</div>
 						<div class="text-xs text-gray-500 dark:text-gray-300">Active since { currentUser.LastInteractionTime.Format(time.Kitchen) }</div>
@@ -166,11 +166,11 @@ templ ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUse
 }
 
 templ MessageItem(message model.ChatMessage) {
-	<li id="message-item" class={ "flex items-start gap-2.5",templ.KV("justify-start flex-row-reverse", message.FromUserId==1) }>
-		<img src="https://cdn-icons-png.freepik.com/512/6596/6596121.png" class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
+	<li id="message-item" class={ "flex items-start gap-2.5",templ.KV("justify-start flex-row-reverse", message.UserId==1) }>
+		<img src={ message.Avatar } class="w-10 h-10 min-w-10 min-h-10 rounded-full" alt="avatar"/>
 		<div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-lg dark:bg-gray-700">
 			<div class="flex items-center space-x-2 rtl:space-x-reverse">
-				<span class="text-sm font-semibold text-gray-900 dark:text-white">{ message.FromUserName }</span>
+				<span class="text-sm font-semibold text-gray-900 dark:text-white">{ message.UserName }</span>
 				<span class="text-sm font-normal text-gray-500 dark:text-gray-400">{ message.MessageUpdatedAt.Format(time.Kitchen) }</span>
 			</div>
 			<p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white">{ message.MessageContent }</p>

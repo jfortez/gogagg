@@ -45,8 +45,7 @@ func GetMessages(connection *sql.DB, fromUserId int, toUserId int) (messages []m
 				m.status AS messageStatus,
 				m.fromUserId,
 				u_from.name AS fromUserName,
-				m.toUserId,
-				u_to.name AS toUserName
+				u_from.avatar AS userAvatar
 		FROM 
 				messages m
 		JOIN 
@@ -67,7 +66,7 @@ func GetMessages(connection *sql.DB, fromUserId int, toUserId int) (messages []m
 	defer rows.Close()
 	for rows.Next() {
 		var message model.ChatMessage
-		err = rows.Scan(&message.MessageId, &message.MessageContent, &message.MessageCreatedAt, &message.MessageUpdatedAt, &message.MessageStatus, &message.FromUserId, &message.FromUserName, &message.ToUserId, &message.ToUserName)
+		err = rows.Scan(&message.MessageId, &message.MessageContent, &message.MessageCreatedAt, &message.MessageUpdatedAt, &message.MessageStatus, &message.UserId, &message.UserName, &message.Avatar)
 		messages = append(messages, message)
 		if err != nil {
 			return messages, err
@@ -83,6 +82,7 @@ SELECT
 		m.id as messageId,
     u.id AS userId,
     u.name AS userName,
+		u.avatar AS userAvatar,
     m.content AS lastMessageContent,
     m.createdAt AS lastMessageCreatedAt,
     m.updatedAt AS lastMessageUpdatedAt
@@ -120,7 +120,7 @@ ORDER BY
 
 	for rows.Next() {
 		var message model.RequestedMessages
-		err = rows.Scan(&message.MessageId, &message.UserId, &message.UserName, &message.Content, &message.CreatedAt, &message.UpdatedAt)
+		err = rows.Scan(&message.MessageId, &message.UserId, &message.UserName, &message.UserAvatar, &message.Content, &message.CreatedAt, &message.UpdatedAt)
 		messages = append(messages, message)
 		if err != nil {
 			return messages, err

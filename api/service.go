@@ -42,9 +42,7 @@ func (s *Service) Run() {
 
 	router.HandleFunc("/login", http.HandlerFunc(handleLoginView))
 	router.HandleFunc("/register", http.HandlerFunc(handleRegisterView))
-	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		services.ServeWs(s.wsHub, w, r)
-	})
+	router.HandleFunc("/ws", s.handleWs)
 
 	router.HandleFunc("POST /sendMessage", s.handleSendMessage)
 	router.HandleFunc("POST /message", s.handleMessage)
@@ -84,7 +82,10 @@ func (s *Service) handleMessage(w http.ResponseWriter, r *http.Request) {
 		UserId:              vals.UserId,
 		UserName:            vals.UserName,
 		LastInteractionTime: vals.UpdatedAt,
+		Avatar:              vals.UserAvatar,
 	}
+
+	fmt.Println(currentUser)
 
 	chatContent := templates.ChatContent(messages, currentUser)
 	chatContent.Render(r.Context(), w)
@@ -114,7 +115,7 @@ func (s *Service) handleSendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chatItem := templates.MessageItem(model.ChatMessage{FromUserId: newMessage.FromUserId, FromUserName: "John Doe", MessageContent: newMessage.Content, MessageStatus: newMessage.Status})
+	chatItem := templates.MessageItem(model.ChatMessage{UserId: newMessage.FromUserId, UserName: "John Doe", MessageContent: newMessage.Content, MessageStatus: newMessage.Status})
 
 	chatItem.Render(r.Context(), w)
 
@@ -218,4 +219,8 @@ func (s *Service) handleRegister(w http.ResponseWriter, r *http.Request) {
 		"message": "User created successfully",
 	}
 	json.NewEncoder(w).Encode(message)
+}
+
+func (s *Service) handleWs(w http.ResponseWriter, r *http.Request) {
+	services.ServeWs(s.wsHub, w, r)
 }
