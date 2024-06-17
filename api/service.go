@@ -18,10 +18,12 @@ import (
 type Service struct {
 	storage *sql.DB
 	wsHub   *services.Hub
+	address string
 }
 
-func NewService(storage *sql.DB, wsHub *services.Hub) *Service {
+func NewService(address string, storage *sql.DB, wsHub *services.Hub) *Service {
 	return &Service{
+		address: address,
 		storage: storage,
 		wsHub:   wsHub,
 	}
@@ -54,12 +56,12 @@ func (s *Service) Run() {
 
 	srv := &http.Server{
 		Handler:      middleware.Logging(router),
-		Addr:         ":8000",
+		Addr:         s.address,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	fmt.Println("Server Listening on localhost:8000")
+	fmt.Printf("Server Listening on port %s\n", s.address)
 	log.Fatal(srv.ListenAndServe())
 }
 
