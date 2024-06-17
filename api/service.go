@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jfortez/gogagg/api/middleware"
+	"github.com/jfortez/gogagg/db"
 	"github.com/jfortez/gogagg/model"
 	"github.com/jfortez/gogagg/services"
 	"github.com/jfortez/gogagg/web/templates"
@@ -21,10 +22,10 @@ type Service struct {
 	address string
 }
 
-func NewService(address string, storage *sql.DB, wsHub *services.Hub) *Service {
+func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Service {
 	return &Service{
 		address: address,
-		storage: storage,
+		storage: storage.DB,
 		wsHub:   wsHub,
 	}
 }

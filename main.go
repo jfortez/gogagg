@@ -18,7 +18,7 @@ func main() {
 	hub := services.NewHub()
 	go hub.Run()
 
-	service := api.NewService(address, storage.DB, hub)
+	service := api.NewService(address, storage, hub)
 	service.Run()
 
 }
