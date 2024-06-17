@@ -7,9 +7,19 @@ import (
 	"github.com/jfortez/gogagg/api/handler"
 )
 
-func GetRoutes(router *http.ServeMux, db *sql.DB) {
+type APIRoutes struct {
+	router  *http.ServeMux
+	storage *sql.DB
+}
 
-	userHandles := handler.NewUserHandler(db)
+func NewAPIRoutes(router *http.ServeMux, db *sql.DB) *APIRoutes {
+	return &APIRoutes{router: router, storage: db}
+}
+
+func (r *APIRoutes) Run() {
+
+	userHandles := handler.NewUserHandler(r.storage)
+	router := r.router
 
 	router.HandleFunc("GET /api/v1/todos", handler.TodosHandle)
 	router.HandleFunc("GET /api/v1/todos/{id}", handler.TodoHandle)

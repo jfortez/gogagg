@@ -6,11 +6,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DataBase struct {
-	Connection *sql.DB
+type Storage struct {
+	*sql.DB
 }
 
-func New() *DataBase {
+func New() *Storage {
 
 	connStr := "postgres://root:root@localhost/gogag?sslmode=disable"
 
@@ -19,5 +19,7 @@ func New() *DataBase {
 		panic(err)
 	}
 
-	return &DataBase{Connection: db}
+	return &Storage{
+		DB: db,
+	}
 }
