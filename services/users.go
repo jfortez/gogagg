@@ -40,7 +40,7 @@ func GetUsers(connection *sql.DB) (users []model.User) {
 }
 
 func FindAuthUser(connection *sql.DB, email string, password string) (user model.User, err error) {
-	stmt, err := connection.Prepare("SELECT id,name,email,age,img,description,createdAt FROM users WHERE email = ? AND password = ?")
+	stmt, err := connection.Prepare("SELECT id,name,email,age,avatar,description,createdAt FROM users WHERE email = $1 AND password = $2")
 	if err != nil {
 		return user, err
 	}
