@@ -1,12 +1,13 @@
 package api
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/jfortez/gogagg/api/middleware"
@@ -30,6 +31,15 @@ func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Servi
 	}
 }
 
+func (s *Service) generateToken() string {
+	// generate a random token
+	token := make([]byte, 32)
+	if _, err := rand.Read(token); err != nil {
+		panic(err)
+	}
+	return base64.StdEncoding.EncodeToString(token)
+}
+
 func (s *Service) Run() {
 	router := http.NewServeMux()
 
@@ -41,10 +51,10 @@ func (s *Service) Run() {
 	fs := http.FileServer(dir)
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// WEB
-	router.HandleFunc("/", http.HandlerFunc(s.handleChatView))
+	router.HandleFunc("/", handleProtectedRoute(s.handleChatView))
 
-	router.HandleFunc("/login", http.HandlerFunc(handleLoginView))
-	router.HandleFunc("/register", http.HandlerFunc(handleRegisterView))
+	router.HandleFunc("/login", handlePublicRoute(handleLoginView))
+	router.HandleFunc("/register", handlePublicRoute(handleRegisterView))
 	router.HandleFunc("/ws", s.handleWs)
 
 	router.HandleFunc("POST /sendMessage", s.handleSendMessage)
@@ -123,6 +133,38 @@ func (s *Service) handleSendMessage(w http.ResponseWriter, r *http.Request) {
 	chatItem.Render(r.Context(), w)
 
 }
+func handleProtectedRoute(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := r.Cookie("token")
+
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		// validate token
+		if token.Value != "" {
+			handler(w, r)
+		}
+
+	}
+}
+
+func handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := r.Cookie("token")
+
+		if err != nil {
+			handler(w, r)
+			return
+		}
+
+		// validate token
+		if token.Value != "" {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+	}
+}
 func handleLoginView(w http.ResponseWriter, r *http.Request) {
 	templates.Login().Render(r.Context(), w)
 }
@@ -163,15 +205,18 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie := http.Cookie{
-		Name:     "user",
-		Value:    strconv.Itoa(user.Id),
+	fmt.Println(user)
+	cookie := &http.Cookie{
+		// Name:     "user",
+		// Value:    strconv.Itoa(user.Id),
+		Name:     "token",
+		Value:    s.generateToken(),
 		Path:     "/",
 		Expires:  time.Now().Add(time.Hour * 24 * 365),
 		Secure:   true,
 		HttpOnly: true,
 	}
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, cookie)
 	w.Header().Set("HX-Redirect", "/")
 	message := map[string]string{
 		"message": "User logged in successfully",
