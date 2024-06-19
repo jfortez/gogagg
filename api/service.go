@@ -195,9 +195,20 @@ func handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
 
 		err = verifyToken(token.Value)
 
-		if err == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
+		if err != nil {
+
+			c := &http.Cookie{
+				Name:    "token",
+				Value:   "",
+				Path:    "/",
+				Expires: time.Unix(0, 0),
+			}
+			http.SetCookie(w, c)
+			handler(w, r)
+			return
 		}
+
+		http.Redirect(w, r, "/", http.StatusFound)
 
 	}
 }
