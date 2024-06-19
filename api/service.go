@@ -1,15 +1,14 @@
 package api
 
 import (
-	"crypto/rand"
 	"database/sql"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jfortez/gogagg/api/middleware"
 	"github.com/jfortez/gogagg/db"
 	"github.com/jfortez/gogagg/model"
@@ -31,13 +30,37 @@ func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Servi
 	}
 }
 
-func (s *Service) generateToken() string {
-	// generate a random token
-	token := make([]byte, 32)
-	if _, err := rand.Read(token); err != nil {
-		panic(err)
+var secretKey = []byte("secret-key")
+
+func createToken(username string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"user": username,
+			"exp":  time.Now().Add(time.Minute * 1).Unix(),
+		})
+
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
 	}
-	return base64.StdEncoding.EncodeToString(token)
+
+	return tokenString, nil
+}
+
+func verifyToken(tokenString string) error {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if !token.Valid {
+		return fmt.Errorf("invalid token")
+	}
+
+	return nil
 }
 
 func (s *Service) Run() {
@@ -141,10 +164,22 @@ func handleProtectedRoute(handler http.HandlerFunc) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		// validate token
-		if token.Value != "" {
-			handler(w, r)
+
+		err = verifyToken(token.Value)
+
+		if err != nil {
+			c := &http.Cookie{
+				Name:    "token",
+				Value:   "",
+				Path:    "/",
+				Expires: time.Unix(0, 0),
+			}
+			http.SetCookie(w, c)
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
 		}
+
+		handler(w, r)
 
 	}
 }
@@ -158,11 +193,12 @@ func handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// validate token
-		if token.Value != "" {
+		err = verifyToken(token.Value)
+
+		if err == nil {
 			http.Redirect(w, r, "/", http.StatusFound)
-			return
 		}
+
 	}
 }
 func handleLoginView(w http.ResponseWriter, r *http.Request) {
@@ -205,14 +241,16 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(user)
+	token, err := createToken(user.Name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	cookie := &http.Cookie{
-		// Name:     "user",
-		// Value:    strconv.Itoa(user.Id),
 		Name:     "token",
-		Value:    s.generateToken(),
+		Value:    token,
 		Path:     "/",
-		Expires:  time.Now().Add(time.Hour * 24 * 365),
+		Expires:  time.Now().Add(time.Minute * 1),
 		Secure:   true,
 		HttpOnly: true,
 	}
