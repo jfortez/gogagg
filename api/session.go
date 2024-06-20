@@ -15,6 +15,8 @@ type Session struct {
 	secretKey  []byte
 }
 
+const SHOW_USER_COOKIE = false
+
 func NewSession(expiration time.Duration, secretKey []byte) *Session {
 	return &Session{
 		expiration: expiration,
@@ -99,13 +101,15 @@ func (a *Session) removeSession(w http.ResponseWriter, r *http.Request) {
 		Path:    "/",
 		Expires: time.Unix(0, 0),
 	}
-	cUser := &http.Cookie{
-		Name:    "user",
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
+	if SHOW_USER_COOKIE {
+		cUser := &http.Cookie{
+			Name:    "user",
+			Value:   "",
+			Path:    "/",
+			Expires: time.Unix(0, 0),
+		}
+		http.SetCookie(w, cUser)
 	}
-	http.SetCookie(w, cUser)
 	http.SetCookie(w, cToken)
 }
 
@@ -130,17 +134,19 @@ func (a *Session) setSession(w http.ResponseWriter, r *http.Request, user model.
 		Secure:   true,
 		HttpOnly: true,
 	}
-	usrCookie := &http.Cookie{
-		Name:     "user",
-		Value:    string(jsonUser),
-		Path:     "/",
-		Expires:  time.Now().Add(a.expiration),
-		Secure:   true,
-		HttpOnly: true,
-	}
+	if SHOW_USER_COOKIE {
+		usrCookie := &http.Cookie{
+			Name:     "user",
+			Value:    string(jsonUser),
+			Path:     "/",
+			Expires:  time.Now().Add(a.expiration),
+			Secure:   true,
+			HttpOnly: true,
+		}
 
+		http.SetCookie(w, usrCookie)
+	}
 	http.SetCookie(w, cookie)
-	http.SetCookie(w, usrCookie)
 
 	return nil
 }
