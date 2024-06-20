@@ -20,13 +20,13 @@ type Service struct {
 	storage     *sql.DB
 	wsHub       *services.Hub
 	address     string
-	authService *Auth
+	authService *Session
 }
 
 const duration = time.Minute * 1
 
 func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Service {
-	authService := NewAuth(duration, []byte(os.Getenv("SECRET_KEY")))
+	authService := NewSession(duration, []byte(os.Getenv("SECRET_KEY")))
 	return &Service{
 		address:     address,
 		storage:     storage.DB,

@@ -7,19 +7,19 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type Auth struct {
+type Session struct {
 	expiration time.Duration
 	secretKey  []byte
 }
 
-func NewAuth(expiration time.Duration, secretKey []byte) *Auth {
-	return &Auth{
+func NewSession(expiration time.Duration, secretKey []byte) *Session {
+	return &Session{
 		expiration: expiration,
 		secretKey:  secretKey,
 	}
 }
 
-func (a *Auth) CreateToken(username string) (string, error) {
+func (a *Session) CreateToken(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"user": username,
@@ -33,11 +33,11 @@ func (a *Auth) CreateToken(username string) (string, error) {
 
 	return tokenString, nil
 }
-func (a *Auth) parseFunc(token *jwt.Token) (interface{}, error) {
+func (a *Session) parseFunc(token *jwt.Token) (interface{}, error) {
 	return a.secretKey, nil
 }
 
-func (a *Auth) VerifyToken(tokenString string) error {
+func (a *Session) VerifyToken(tokenString string) error {
 	token, err := jwt.Parse(tokenString, a.parseFunc)
 
 	if err != nil {
