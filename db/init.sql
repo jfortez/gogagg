@@ -24,9 +24,9 @@
 	);
 
 INSERT INTO users (name, email, age, avatar, password, description)
-VALUES('John Doe', 'jdoe@doemail.com', 23, 'https://i.pravatar.cc/150', '123456', 'A simple todo app built with Go and Tailwind CSS'),
-('Bonnie Green', 'bgreen@doemail.com', 23, 'https://i.pravatar.cc/150', '123456', 'A simple todo app built with Go and Tailwind CSS'),
-('John Smith', 'jsmith@doemail.com', 23, 'https://i.pravatar.cc/150', '123456', 'A simple todo app built with Go and Tailwind CSS');
+VALUES('John Doe', 'jdoe@doemail.com', 23, 'https://cdn.pfps.gg/pfps/9076-amber-rawr.png', '123456', 'A simple todo app built with Go and Tailwind CSS'),
+('Bonnie Green', 'bgreen@doemail.com', 23, 'https://i.pinimg.com/736x/5e/19/68/5e196899ff4b98d4352d1ba7337db1ee.jpg', '123456', 'A simple todo app built with Go and Tailwind CSS'),
+('John Smith', 'jsmith@doemail.com', 23, 'https://cdn.rudo.video/upload/cl3/adn/640892/5fff0b313d8e7_0.jpg', '123456', 'A simple todo app built with Go and Tailwind CSS');
 
 INSERT INTO messages(content, fromUserId, toUserId, status)
 VALUES('Hello', 1, 2, 'delivered'),
