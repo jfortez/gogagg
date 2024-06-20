@@ -23,7 +23,7 @@ type Service struct {
 	session *Session
 }
 
-const duration = time.Minute * 1
+const duration = time.Minute * 5
 
 func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Service {
 	session := NewSession(duration, []byte(os.Getenv("SECRET_KEY")))
@@ -80,7 +80,13 @@ func (s *Service) handleMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messages, err := services.GetMessages(s.storage, vals.UserId, 1)
+	loggedUser, err := s.session.getUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	messages, err := services.GetMessages(s.storage, vals.UserId, loggedUser.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -95,12 +101,13 @@ func (s *Service) handleMessage(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(currentUser)
 
-	chatContent := templates.ChatContent(messages, currentUser)
+	chatContent := templates.ChatContent(messages, currentUser, loggedUser)
 	chatContent.Render(r.Context(), w)
 
 }
 
 func (s *Service) handleSendMessage(w http.ResponseWriter, r *http.Request) {
+
 	requestedMessage := model.RequestMessage{}
 
 	err := json.NewDecoder(r.Body).Decode(&requestedMessage)
@@ -109,11 +116,16 @@ func (s *Service) handleSendMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	loggedUser, err := s.session.getUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	newMessage := model.CreateMessage{
 		Content:    requestedMessage.Content,
 		Status:     "delivered",
-		FromUserId: 1,
+		FromUserId: loggedUser.Id,
 		ToUserId:   requestedMessage.UserId,
 	}
 	err = services.SendMessage(s.storage, newMessage)
@@ -123,7 +135,17 @@ func (s *Service) handleSendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chatItem := templates.MessageItem(model.ChatMessage{UserId: newMessage.FromUserId, UserName: "John Doe", MessageContent: newMessage.Content, MessageStatus: newMessage.Status})
+	newMessageItem := model.ChatMessage{
+		UserId:           loggedUser.Id,
+		UserName:         loggedUser.Name,
+		MessageContent:   newMessage.Content,
+		MessageStatus:    newMessage.Status,
+		Avatar:           loggedUser.Avatar,
+		MessageCreatedAt: time.Now(),
+		MessageUpdatedAt: time.Now(),
+	}
+
+	chatItem := templates.MessageItem(newMessageItem, loggedUser)
 
 	chatItem.Render(r.Context(), w)
 
@@ -140,13 +162,7 @@ func (s *Service) handleProtectedRoute(handler http.HandlerFunc) http.HandlerFun
 		err = s.session.VerifyToken(token.Value)
 
 		if err != nil {
-			c := &http.Cookie{
-				Name:    "token",
-				Value:   "",
-				Path:    "/",
-				Expires: time.Unix(0, 0),
-			}
-			http.SetCookie(w, c)
+
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
@@ -169,13 +185,7 @@ func (s *Service) handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
 
 		if err != nil {
 
-			c := &http.Cookie{
-				Name:    "token",
-				Value:   "",
-				Path:    "/",
-				Expires: time.Unix(0, 0),
-			}
-			http.SetCookie(w, c)
+			s.session.removeSession(w, r)
 			handler(w, r)
 			return
 		}
@@ -192,12 +202,19 @@ func handleRegisterView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) handleChatView(w http.ResponseWriter, r *http.Request) {
+
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
 
-	chatList, err := services.GetMessageListByCurrentUser(s.storage, 1)
+	userLogged, err := s.session.getUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	chatList, err := services.GetMessageListByCurrentUser(s.storage, userLogged.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -224,36 +241,13 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonUser, err := json.Marshal(user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	token, err := s.session.CreateToken(string(jsonUser))
+	err = s.session.setSession(w, r, user)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	cookie := &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Path:     "/",
-		Expires:  time.Now().Add(duration),
-		Secure:   true,
-		HttpOnly: true,
-	}
-	usrCookie := &http.Cookie{
-		Name:     "user",
-		Value:    string(jsonUser),
-		Path:     "/",
-		Expires:  time.Now().Add(duration),
-		Secure:   true,
-		HttpOnly: true,
-	}
-	http.SetCookie(w, cookie)
-	http.SetCookie(w, usrCookie)
+
 	w.Header().Set("HX-Redirect", "/")
 	message := map[string]string{
 		"message": "User logged in successfully",
