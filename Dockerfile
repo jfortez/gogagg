@@ -53,8 +53,6 @@ LABEL NAME="gogagg"
 RUN apk update
 RUN apk add --no-cache ca-certificates
 
-ENV PORT="8000"
-
 WORKDIR /app
 COPY --from=BUILDER /app .
 
