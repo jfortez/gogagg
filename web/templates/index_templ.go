@@ -35,14 +35,14 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"text/javascript\">\r\n   window.onload = function () {\r\n\r\n    var conn;\r\n    var msg = document.getElementById(\"msg\");\r\n    var log = document.getElementById(\"log\");\r\n\r\n    function appendLog(item) {\r\n        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;\r\n        log.appendChild(item);\r\n        if (doScroll) {\r\n            log.scrollTop = log.scrollHeight - log.clientHeight;\r\n        }\r\n    }\r\n\r\n    document.getElementById(\"form\").onsubmit = function () {\r\n        if (!conn) {\r\n            return false;\r\n        }\r\n        if (!msg.value) {\r\n            return false;\r\n        }\r\n        conn.send(msg.value);\r\n        msg.value = \"\";\r\n        return false;\r\n    };\r\n\r\n    if (window[\"WebSocket\"]) {\r\n        conn = new WebSocket(\"ws://\" + document.location.host + \"/ws\");\r\n        conn.onclose = function (evt) {\r\n            var item = document.createElement(\"div\");\r\n            item.innerHTML = \"<b>Connection closed.</b>\";\r\n            appendLog(item);\r\n        };\r\n        conn.onmessage = function (evt) {\r\n            var messages = evt.data.split('\\n');\r\n            for (var i = 0; i < messages.length; i++) {\r\n                var item = document.createElement(\"div\");\r\n                item.innerText = messages[i];\r\n                appendLog(item);\r\n            }\r\n        };\r\n    } else {\r\n        var item = document.createElement(\"div\");\r\n        item.innerHTML = \"<b>Your browser does not support WebSockets.</b>\";\r\n        appendLog(item);\r\n    }\r\n};\r\n  </script> <div class=\"h-screen grid grid-cols-12\"><div id=\"requested-messages\" class=\"col-span-3  border-r border-gray-100 dark:border-gray-700\"><div class=\"p-4\"><div class=\"flex items-center justify-between mb-4\"><h1 class=\"text-2xl font-bold text-white\">Messages <span class=\"text-xl text-gray-300\"><span id=\"messages-count\">(")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"text/javascript\">\r\n   window.onload = function () {\r\n    var conn;\r\n    var msg = document.getElementById(\"msg\");\r\n    var log = document.getElementById(\"log\");\r\n\r\n    function appendLog(item) {\r\n        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;\r\n        log.appendChild(item);\r\n        if (doScroll) {\r\n            log.scrollTop = log.scrollHeight - log.clientHeight;\r\n        }\r\n    }\r\n\r\n    document.getElementById(\"form\").onsubmit = function () {\r\n        if (!conn) {\r\n            return false;\r\n        }\r\n        if (!msg.value) {\r\n            return false;\r\n        }\r\n        conn.send(msg.value);\r\n        msg.value = \"\";\r\n        return false;\r\n    };\r\n\r\n    if (window[\"WebSocket\"]) {\r\n        conn = new WebSocket(\"ws://\" + document.location.host + \"/ws\");\r\n        conn.onclose = function (evt) {\r\n            var item = document.createElement(\"div\");\r\n            item.innerHTML = \"<b>Connection closed.</b>\";\r\n            appendLog(item);\r\n        };\r\n        conn.onmessage = function (evt) {\r\n            var messages = evt.data.split('\\n');\r\n            for (var i = 0; i < messages.length; i++) {\r\n                var item = document.createElement(\"div\");\r\n                item.innerText = messages[i];\r\n                appendLog(item);\r\n            }\r\n        };\r\n    } else {\r\n        var item = document.createElement(\"div\");\r\n        item.innerHTML = \"<b>Your browser does not support WebSockets.</b>\";\r\n        appendLog(item);\r\n    }\r\n};\r\n  </script> <div class=\"h-screen grid grid-cols-12\"><div id=\"requested-messages\" class=\"col-span-3  border-r border-gray-100 dark:border-gray-700\"><div class=\"p-4\"><div class=\"flex items-center justify-between mb-4\"><h1 class=\"text-2xl font-bold text-white\">Messages <span class=\"text-xl text-gray-300\"><span id=\"messages-count\">(")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(requestedMessages)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 64, Col: 159}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 63, Col: 159}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -60,7 +60,7 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(toJSON(requestedMessage))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 73, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 72, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -73,7 +73,7 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(requestedMessage.UserAvatar)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 76, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 75, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -86,7 +86,7 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(requestedMessage.UserName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 78, Col: 108}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 77, Col: 108}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -99,7 +99,7 @@ func Index(requestedMessages []model.RequestedMessages) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(requestedMessage.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 80, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 79, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -158,7 +158,7 @@ func ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUser
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(currentUser.Avatar)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 116, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 115, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -171,7 +171,7 @@ func ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUser
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(currentUser.UserName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 118, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 117, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -184,7 +184,7 @@ func ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUser
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(currentUser.LastInteractionTime.Format(time.Kitchen))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 119, Col: 127}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 118, Col: 127}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -207,7 +207,7 @@ func ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUser
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(toJSON(currentUser))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 138, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 137, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -262,7 +262,7 @@ func MessageItem(message model.ChatMessage, loggedUser model.AuthUser) templ.Com
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(message.Avatar)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 175, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 174, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -275,7 +275,7 @@ func MessageItem(message model.ChatMessage, loggedUser model.AuthUser) templ.Com
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(message.UserName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 178, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 177, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -288,7 +288,7 @@ func MessageItem(message model.ChatMessage, loggedUser model.AuthUser) templ.Com
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(message.MessageUpdatedAt.Format(time.Kitchen))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 179, Col: 118}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 178, Col: 118}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -301,7 +301,7 @@ func MessageItem(message model.ChatMessage, loggedUser model.AuthUser) templ.Com
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(message.MessageContent)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 181, Col: 95}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 180, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -314,7 +314,7 @@ func MessageItem(message model.ChatMessage, loggedUser model.AuthUser) templ.Com
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(message.MessageStatus)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 182, Col: 93}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templates/index.templ`, Line: 181, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
