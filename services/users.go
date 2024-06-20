@@ -39,8 +39,8 @@ func GetUsers(connection *sql.DB) (users []model.User) {
 	return
 }
 
-func FindAuthUser(connection *sql.DB, email string, password string) (user model.User, err error) {
-	stmt, err := connection.Prepare("SELECT id,name,email,age,avatar,description,createdAt FROM users WHERE email = $1 AND password = $2")
+func FindAuthUser(connection *sql.DB, email string, password string) (user model.AuthUser, err error) {
+	stmt, err := connection.Prepare("SELECT id,name,avatar,description,createdAt FROM users WHERE email = $1 AND password = $2")
 	if err != nil {
 		return user, err
 	}
@@ -52,7 +52,7 @@ func FindAuthUser(connection *sql.DB, email string, password string) (user model
 		return user, row.Err()
 	}
 
-	err = row.Scan(&user.Id, &user.Name, &user.Email, &user.Age, &user.Avatar, &user.Description, &user.CreatedAt)
+	err = row.Scan(&user.Id, &user.Name, &user.Avatar, &user.Description, &user.CreatedAt)
 
 	if err != nil {
 		return user, err

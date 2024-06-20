@@ -19,10 +19,10 @@ func NewSession(expiration time.Duration, secretKey []byte) *Session {
 	}
 }
 
-func (a *Session) CreateToken(username string) (string, error) {
+func (a *Session) CreateToken(user string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"user": username,
+			"user": user,
 			"exp":  time.Now().Add(a.expiration).Unix(),
 		})
 

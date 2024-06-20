@@ -17,21 +17,21 @@ import (
 )
 
 type Service struct {
-	storage     *sql.DB
-	wsHub       *services.Hub
-	address     string
-	authService *Session
+	storage *sql.DB
+	wsHub   *services.Hub
+	address string
+	session *Session
 }
 
 const duration = time.Minute * 1
 
 func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Service {
-	authService := NewSession(duration, []byte(os.Getenv("SECRET_KEY")))
+	session := NewSession(duration, []byte(os.Getenv("SECRET_KEY")))
 	return &Service{
-		address:     address,
-		storage:     storage.DB,
-		wsHub:       wsHub,
-		authService: authService,
+		address: address,
+		storage: storage.DB,
+		wsHub:   wsHub,
+		session: session,
 	}
 }
 
@@ -137,7 +137,7 @@ func (s *Service) handleProtectedRoute(handler http.HandlerFunc) http.HandlerFun
 			return
 		}
 
-		err = s.authService.VerifyToken(token.Value)
+		err = s.session.VerifyToken(token.Value)
 
 		if err != nil {
 			c := &http.Cookie{
@@ -165,7 +165,7 @@ func (s *Service) handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		err = s.authService.VerifyToken(token.Value)
+		err = s.session.VerifyToken(token.Value)
 
 		if err != nil {
 
@@ -224,7 +224,14 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.authService.CreateToken(user.Name)
+	jsonUser, err := json.Marshal(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	token, err := s.session.CreateToken(string(jsonUser))
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -237,7 +244,16 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 		HttpOnly: true,
 	}
+	usrCookie := &http.Cookie{
+		Name:     "user",
+		Value:    string(jsonUser),
+		Path:     "/",
+		Expires:  time.Now().Add(duration),
+		Secure:   true,
+		HttpOnly: true,
+	}
 	http.SetCookie(w, cookie)
+	http.SetCookie(w, usrCookie)
 	w.Header().Set("HX-Redirect", "/")
 	message := map[string]string{
 		"message": "User logged in successfully",
