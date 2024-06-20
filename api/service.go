@@ -23,7 +23,7 @@ type Service struct {
 	session *Session
 }
 
-const duration = time.Minute * 5
+const duration = time.Hour * 24
 
 func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Service {
 	session := NewSession(duration, []byte(os.Getenv("SECRET_KEY")))
