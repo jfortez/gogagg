@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/jfortez/gogagg/api/middleware"
 	"github.com/jfortez/gogagg/db"
 	"github.com/jfortez/gogagg/model"
@@ -17,50 +17,22 @@ import (
 )
 
 type Service struct {
-	storage *sql.DB
-	wsHub   *services.Hub
-	address string
+	storage     *sql.DB
+	wsHub       *services.Hub
+	address     string
+	authService *Auth
 }
+
+const duration = time.Minute * 1
 
 func NewService(address string, storage *db.Storage, wsHub *services.Hub) *Service {
+	authService := NewAuth(duration, []byte(os.Getenv("SECRET_KEY")))
 	return &Service{
-		address: address,
-		storage: storage.DB,
-		wsHub:   wsHub,
+		address:     address,
+		storage:     storage.DB,
+		wsHub:       wsHub,
+		authService: authService,
 	}
-}
-
-var secretKey = []byte("secret-key")
-
-func createToken(username string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"user": username,
-			"exp":  time.Now().Add(time.Minute * 1).Unix(),
-		})
-
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
-}
-
-func verifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-
-	if err != nil {
-		return err
-	}
-
-	if !token.Valid {
-		return fmt.Errorf("invalid token")
-	}
-
-	return nil
 }
 
 func (s *Service) Run() {
@@ -74,10 +46,10 @@ func (s *Service) Run() {
 	fs := http.FileServer(dir)
 	router.Handle("/static/", http.StripPrefix("/static/", fs))
 	// WEB
-	router.HandleFunc("/", handleProtectedRoute(s.handleChatView))
+	router.HandleFunc("/", s.handleProtectedRoute(s.handleChatView))
 
-	router.HandleFunc("/login", handlePublicRoute(handleLoginView))
-	router.HandleFunc("/register", handlePublicRoute(handleRegisterView))
+	router.HandleFunc("/login", s.handlePublicRoute(handleLoginView))
+	router.HandleFunc("/register", s.handlePublicRoute(handleRegisterView))
 	router.HandleFunc("/ws", s.handleWs)
 
 	router.HandleFunc("POST /sendMessage", s.handleSendMessage)
@@ -156,7 +128,7 @@ func (s *Service) handleSendMessage(w http.ResponseWriter, r *http.Request) {
 	chatItem.Render(r.Context(), w)
 
 }
-func handleProtectedRoute(handler http.HandlerFunc) http.HandlerFunc {
+func (s *Service) handleProtectedRoute(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := r.Cookie("token")
 
@@ -165,7 +137,7 @@ func handleProtectedRoute(handler http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		err = verifyToken(token.Value)
+		err = s.authService.VerifyToken(token.Value)
 
 		if err != nil {
 			c := &http.Cookie{
@@ -184,7 +156,7 @@ func handleProtectedRoute(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
+func (s *Service) handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := r.Cookie("token")
 
@@ -193,7 +165,7 @@ func handlePublicRoute(handler http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		err = verifyToken(token.Value)
+		err = s.authService.VerifyToken(token.Value)
 
 		if err != nil {
 
@@ -252,7 +224,7 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := createToken(user.Name)
+	token, err := s.authService.CreateToken(user.Name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -261,7 +233,7 @@ func (s *Service) handleLogin(w http.ResponseWriter, r *http.Request) {
 		Name:     "token",
 		Value:    token,
 		Path:     "/",
-		Expires:  time.Now().Add(time.Minute * 1),
+		Expires:  time.Now().Add(duration),
 		Secure:   true,
 		HttpOnly: true,
 	}
