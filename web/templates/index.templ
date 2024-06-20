@@ -66,7 +66,7 @@ templ Index(requestedMessages []model.RequestedMessages) {
 						for _, requestedMessage := range requestedMessages {
 							<li
 								hx-post="/message"
-								hx-target="#chat-content"
+								hx-target="#chat-container"
 								hx-swap="innerHTML"
 								hx-ext="json-enc"
 								hx-vals={ toJSON(requestedMessage) }
@@ -84,7 +84,7 @@ templ Index(requestedMessages []model.RequestedMessages) {
 					</ul>
 				</div>
 			</div>
-			<div id="chat-content" class="col-span-9 h-dvh">
+			<div id="chat-container" class="col-span-9 h-dvh">
 				<div class="h-full flex justify-center items-center">
 					<h1 class="text-2xl font-bold text-white">Chat Content</h1>
 				</div>
@@ -102,6 +102,10 @@ func toJSON(item any) string {
 }
 
 templ ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUser, loggedUser model.AuthUser) {
+	<script type="text/javascript">
+		const messagesList = document.getElementById("messages-list");
+			messagesList.scrollTop = messagesList.scrollHeight;
+	</script>
 	<div class="h-full">
 		<div class="h-[calc(100%_-_66px)] relative">
 			<div
@@ -120,7 +124,7 @@ templ ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUse
 					</svg>
 				</div>
 			</div>
-			<ul id="messages-list" class="p-4 flex flex-col gap-4  h-[calc(100%_-_3rem)] overflow-y-auto">
+			<ul id="messages-list" class="p-4 flex flex-col gap-4  h-[calc(100%_-_3rem)] overflow-y-auto scroll-smooth">
 				for _,message:=range messages {
 					@MessageItem(message, loggedUser)
 				}
@@ -131,7 +135,7 @@ templ ChatContent(messages []model.ChatMessage, currentUser model.CurrentChatUse
 				class="px-2 pb-2"
 				hx-post="/sendMessage"
 				hx-vals={ toJSON(currentUser) }
-				hx-on::after-request="this.reset()"
+				hx-on::after-request="this.reset(); messagesList.scrollTop = messagesList.scrollHeight;"
 				hx-ext="json-enc"
 				hx-target="#messages-list"
 				hx-swap="beforeend"
