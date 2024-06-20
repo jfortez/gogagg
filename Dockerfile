@@ -2,7 +2,6 @@
 # build stage
 FROM golang:1.22.2-alpine3.19 AS BUILDER
 
-ENV ADDRESS="127.0.0.1:8000"
 ENV CGO_ENABLED=1
 
 RUN apk add --no-cache git \
@@ -34,6 +33,18 @@ RUN npm install
 COPY . .
 RUN npm run build
 
+#postgres stage
+FROM postgres:16.3-alpine3.19
+
+
+ENV POSTGRES_PASSWORD=root
+ENV POSTGRES_USER=root
+ENV POSTGRES_DB=gogag
+
+COPY ./db/init.sql /docker-entrypoint-initdb.d/db.sql
+
+EXPOSE 5432
+
 
 # final stage
 FROM alpine:3.19
@@ -42,7 +53,11 @@ LABEL NAME="gogagg"
 RUN apk update
 RUN apk add --no-cache ca-certificates
 
+ENV PORT="8000"
+
 WORKDIR /app
 COPY --from=BUILDER /app .
+
+EXPOSE 8000
 
 ENTRYPOINT ["./app"]
