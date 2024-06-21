@@ -1,9 +1,9 @@
 #build docker image
 image:
 	@echo "Building docker image"
-	@docker build -t goapp .
+	@docker-compose up --build
 
-clear-image:
+clearim:stopim
 	@echo "Clearing docker image"
 	@docker rmi goapp
 

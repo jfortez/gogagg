@@ -1,0 +1,19 @@
+FROM node:20-alpine AS node_builder
+WORKDIR /app
+
+# Copiar los archivos del proyecto
+COPY package.json pnpm-lock.yaml ./
+
+# Instalar las dependencias y ejecutar el script de build
+RUN npm install
+
+# Copiar el resto de los archivos del proyecto
+COPY . .
+
+RUN npm run build
+
+# Si necesitas copiar los archivos generados en el contenedor Go, puedes hacer algo como esto:
+# FROM node_builder AS output
+# COPY --from=node_builder /app/web/static/css/output.css /output
+
+# Nota: Si necesitas los archivos generados por `npm run build` en tu contenedor Go, deberías copiarlos en la etapa de construcción.

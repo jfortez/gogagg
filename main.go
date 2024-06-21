@@ -11,7 +11,9 @@ import (
 
 func main() {
 
-	address := os.Getenv("PORT")
+	HOST := os.Getenv("HOST")
+	PORT := os.Getenv("PORT")
+	address := HOST + ":" + PORT
 	storage := db.New()
 	defer storage.Close()
 
