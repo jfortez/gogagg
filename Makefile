@@ -1,7 +1,7 @@
 #build docker image
 image:
 	@echo "Building docker image"
-	@docker-compose up --build
+	@docker-compose up -d
 
 clearim:stopim
 	@echo "Clearing docker image"

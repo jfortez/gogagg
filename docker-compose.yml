@@ -19,8 +19,6 @@ services:
       context: .
       dockerfile: Dockerfile.node
     command: ["npm", "run", "build"]
-    volumes:
-      - .:/app
 
   db:
     image: postgres:16.3
